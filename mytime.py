@@ -49,63 +49,70 @@ def run(playwright: Playwright, id, pw, headless=False) -> None:
     # Not necesary, we get redirected here
     #page.goto("https://logonservices.iam.target.com/v1/login/?application=wfm_tm_enablement_ui_prod_im&assurance=2&form=password&referrer=https%3A%2F%2Foauth.iam.target.com%2Fauth%2Foauth%2Fv2%2Fauthorize%3Fclient_id%3Dwfm_tm_enablement_ui_prod_im%26nonce%3Dbj1-NNwzNiEAhxaUBF7FP%26redirect_uri%3Dhttps%3A%2F%2Fmytime.target.com%26response_type%3Dtoken+id_token%26scope%3Dopenid+profile%26state%3D&tid=43be7f22-eec3-4729-80bf-8751c7d6dd66&type=teammember+partner")
 
-    # Click input[type="text"]
-    page.locator("input[type=\"text\"]").click()
+    print(page.url)
 
-    # Fill input[type="text"]
-    page.locator("input[type=\"text\"]").fill(id)
+    if page.url != "https://mytime.target.com/" and page.url != "https://mytime.target.com":
+        # Then we aren't already logged in
 
-    # Press Tab
-    page.locator("input[type=\"text\"]").press("Tab")
+        # Click input[type="text"]
+        page.locator("input[type=\"text\"]").click()
 
-    # Fill input[type="password"]
-    page.locator("input[type=\"password\"]").fill(pw)
+        # Fill input[type="text"]
+        page.locator("input[type=\"text\"]").fill(id)
 
-    # Click button:has-text("Login")
-    page.locator("button:has-text(\"Login\")").click()
-
-    time.sleep(9)
-
-    #print(page.locator("button:has-text(\"SMS\")").all_inner_texts())
-
-    try:
-        smsbuttoncount = page.locator('button:has(:text-is("SMS")').count()
-        # handle occasionally getting the sms otp codes
-    except Exception:
-        print(Exception)
-        smsbuttoncount = 0
-
-    if smsbuttoncount > 0:
-
-        # Click button:has-text("SMS******9026")
-        page.locator("button:has-text(\"SMS\")").click()
-
-        # Click input[type="password"]
-        page.locator("input[type=\"password\"]").click()
+        # Press Tab
+        page.locator("input[type=\"text\"]").press("Tab")
 
         # Fill input[type="password"]
-        otp = input("What is the OTP?")
+        page.locator("input[type=\"password\"]").fill(pw)
 
-        page.locator("input[type=\"password\"]").fill(otp)
+        # Click button:has-text("Login")
+        page.locator("button:has-text(\"Login\")").click()
 
-        # Check input[type="checkbox"]
-        page.locator("input[type=\"checkbox\"]").check()
+        time.sleep(9)
 
-        # Click button:has-text("Submit")
-        # with page.expect_navigation(url="https://mytime.target.com/"):
-        with page.expect_navigation():
-            page.locator("button:has-text(\"Submit\")").click()
+        #print(page.locator("button:has-text(\"SMS\")").all_inner_texts())
 
-    # Click a[role="button"] >> nth=1
+        try:
+            smsbuttoncount = page.locator('button:has(:text-is("SMS")').count()
+            # handle occasionally getting the sms otp codes
+        except Exception:
+            print(Exception)
+            smsbuttoncount = 0
 
-    time.sleep(.5)
+        if smsbuttoncount > 0:
+
+            # Click button:has-text("SMS******9026")
+            page.locator("button:has-text(\"SMS\")").click()
+
+            # Click input[type="password"]
+            page.locator("input[type=\"password\"]").click()
+
+            # Fill input[type="password"]
+            otp = input("What is the OTP?")
+
+            page.locator("input[type=\"password\"]").fill(otp)
+
+            # Check input[type="checkbox"]
+            page.locator("input[type=\"checkbox\"]").check()
+
+            # Click button:has-text("Submit")
+            # with page.expect_navigation(url="https://mytime.target.com/"):
+            with page.expect_navigation():
+                page.locator("button:has-text(\"Submit\")").click()
+
+        # Click a[role="button"] >> nth=1
+
+    print("We are logged in!!! Collecting schedule info")
+
+    time.sleep(1.5)
 
     page.locator("a[role=\"button\"]").nth(1).click()
     # expect(page).to_have_url("https://mytime.target.com/schedule")
 
     schedule = page.locator("li").all_inner_texts()
 
-    time.sleep(.5)
+    time.sleep(1.5)
 
     # Click button >> nth=2
     page.locator("button").nth(2).click()
@@ -125,8 +132,6 @@ def run(playwright: Playwright, id, pw, headless=False) -> None:
     page.locator("button").nth(2).click()
 
     schedule += page.locator("li").all_inner_texts()
-
-    raunch = input("Enter a thing, I am blocking")
 
     # Click [aria-label="Menu"]
     page.locator("[aria-label=\"Menu\"]").click()

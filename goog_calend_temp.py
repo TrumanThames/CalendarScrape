@@ -55,6 +55,7 @@ def add_events(schedule_events, token='token.json'):
 
         for sEvent in schedule_events:
             """Check if event is already in calendar first!!!!!!!!!!!"""
+            # Except that this is done with the id of the event now
             inCalendar = False
             if not inCalendar:
                 try:
