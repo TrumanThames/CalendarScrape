@@ -5,7 +5,7 @@ import sys
 if __name__ == "__main__":
     id = input("What is the mytime user ID?  ")
     pw = input("What is the mytime user Password?  ")
-    schedule = mytime.run_mytime(id, pw, headless=False)
+    schedule = mytime.run_mytime(id, pw, headless=True)
     print("Done collecting the schedule")
     #for s in schedule:
         #print(s)
