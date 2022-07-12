@@ -1,3 +1,4 @@
+import logging
 import datetime
 import os.path
 
@@ -9,6 +10,8 @@ from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
+
+logging.basicConfig(filename='run.log', level=logging.DEBUG)
 
 
 def add_events(schedule_events, token='token.json'):
@@ -36,35 +39,29 @@ def add_events(schedule_events, token='token.json'):
     try:
         service = build('calendar', 'v3', credentials=creds)
 
-        # Call the Calendar API
         now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         print('Getting the upcoming 10 events')
         events_result = service.events().list(calendarId='primary', timeMin=now,
-                                              maxResults=10, singleEvents=False,
-                                              ).execute()
+                                              maxResults=10, singleEvents=True,
+                                              orderBy='startTime').execute()
         events = events_result.get('items', [])
 
         if not events:
             print('No upcoming events found.')
-            return
-
         # Prints the start and name of the next 10 events
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
+        else:
+            for event in events:
+                start = event['start'].get('dateTime', event['start'].get('date'))
+                print(start, event['summary'])
 
         for sEvent in schedule_events:
-            """Check if event is already in calendar first!!!!!!!!!!!"""
-            # Except that this is done with the id of the event now
-            inCalendar = False
-            if not inCalendar:
-                try:
-                    Sevent = service.events().insert(calendarId='primary',
-                    body=sEvent, sendUpdates='all').execute()
-                    print("Added event to calendar : "+str(Sevent.get('htmlLink')))
-                except Exception:
-                    print("Couldn't add event : " + str(sEvent))
-                    print(Exception)
+            try:
+                Sevent = service.events().insert(calendarId='primary',
+                                                 body=sEvent, sendUpdates='all').execute()
+                print("Added event to calendar : "+str(Sevent.get('htmlLink')))
+            except Exception:
+                print("Couldn't add event : " + str(sEvent))
+                logging.exception(Exception)
 
     except HttpError as error:
-        print('An error occurred: %s' % error)
+        print('An HTTP error occurred: %s' % error)

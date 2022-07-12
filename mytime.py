@@ -17,7 +17,8 @@ def parse_schedule(schedule):
         if len(lines) == 1:
             pass
         elif len(lines) >= 5:
-            date = lines[0].split(',')[1][1:]
+            date = lines[0].split(',')[1][1:].split(' ')
+            date = date[0][:3]+date[1]
             start = lines[1]
             end = lines[3]
             Title = "Work at Target - " + lines[4]
@@ -28,7 +29,7 @@ def parse_schedule(schedule):
             timezone = "US/Central"
             events.append({'summary':Title, 'start':{'dateTime':dt_start,'timeZone':timezone},
                            'end':{'dateTime':dt_end, 'timeZone':timezone},
-                           'id':'vorkattarget'+date.lower().replace(' ', ''),
+                           'id':'vorkattarget'+date.lower(),
                            'description':Description, 'location':Location, 'reminders':{'useDefault':False, 'overrides': reminders_for_work}})
         else:
             pass
@@ -45,13 +46,17 @@ def run(playwright: Playwright, id, pw, headless=False) -> None:
     # Go to https://mytime.target.com/
     page.goto("https://mytime.target.com/")
 
+    time.sleep(5)
+
     # Go to https://logonservices.iam.target.com/v1/login/?application=wfm_tm_enablement_ui_prod_im&assurance=2&form=password&referrer=https%3A%2F%2Foauth.iam.target.com%2Fauth%2Foauth%2Fv2%2Fauthorize%3Fclient_id%3Dwfm_tm_enablement_ui_prod_im%26nonce%3Dbj1-NNwzNiEAhxaUBF7FP%26redirect_uri%3Dhttps%3A%2F%2Fmytime.target.com%26response_type%3Dtoken+id_token%26scope%3Dopenid+profile%26state%3D&tid=43be7f22-eec3-4729-80bf-8751c7d6dd66&type=teammember+partner
     # Not necesary, we get redirected here
     #page.goto("https://logonservices.iam.target.com/v1/login/?application=wfm_tm_enablement_ui_prod_im&assurance=2&form=password&referrer=https%3A%2F%2Foauth.iam.target.com%2Fauth%2Foauth%2Fv2%2Fauthorize%3Fclient_id%3Dwfm_tm_enablement_ui_prod_im%26nonce%3Dbj1-NNwzNiEAhxaUBF7FP%26redirect_uri%3Dhttps%3A%2F%2Fmytime.target.com%26response_type%3Dtoken+id_token%26scope%3Dopenid+profile%26state%3D&tid=43be7f22-eec3-4729-80bf-8751c7d6dd66&type=teammember+partner")
 
     print(page.url)
 
-    if page.url != "https://mytime.target.com/" and page.url != "https://mytime.target.com":
+    page.screenshot(path="islogin.png")
+
+    if not (page.url == "https://mytime.target.com/" or page.url == "https://mytime.target.com"):
         # Then we aren't already logged in
 
         # Click input[type="text"]
@@ -69,7 +74,9 @@ def run(playwright: Playwright, id, pw, headless=False) -> None:
         # Click button:has-text("Login")
         page.locator("button:has-text(\"Login\")").click()
 
-        time.sleep(9)
+        time.sleep(5)
+
+        page.screenshot(path="loggedinmaybe.png")
 
         #print(page.locator("button:has-text(\"SMS\")").all_inner_texts())
 
@@ -105,10 +112,18 @@ def run(playwright: Playwright, id, pw, headless=False) -> None:
 
     print("We are logged in!!! Collecting schedule info")
 
-    time.sleep(1.5)
+    time.sleep(3.5)
 
-    page.locator("a[role=\"button\"]").nth(1).click()
+    page.screenshot(path="MaybeLoggedIn.png")
+
+    #page.locator("a[role=\"button\"]").nth(1).click()
+
+    page.goto("https://mytime.target.com/schedule")
     # expect(page).to_have_url("https://mytime.target.com/schedule")
+
+    time.sleep(5)
+
+    page.screenshot(path="mytimeSchedule.png")
 
     schedule = page.locator("li").all_inner_texts()
 
